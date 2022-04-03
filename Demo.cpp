@@ -15,7 +15,7 @@
 using namespace std;
 
 #include "Matrix.hpp"
-using namespace zich;
+
 
 int main() {
   
