@@ -19,9 +19,11 @@ using namespace std;
 
 int main() {
   
-  std::vector<double> identity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  std::vector<double> identity = {1, 0, 0, 1};
   std::vector<double> arr = {3, 0, 0, 0, 3, 0, 0, 0, 3};
-  Matrix a{identity, 3, 3};  // constructor taking a vector and a matrix size
+  std::vector<double> Mat1_3X3 = {1, 2, 3, 4, 5, 6.3, 7, 8, 9};
+  std::vector<double> Mat2_4X2 = {-1.1, 32.6, 13.7, 4, -45.1, 26, 77.3, 8};
+  Matrix a{Mat2_4X2, 4, 2};  // constructor taking a vector and a matrix size
   cout << a << endl;
   /* prints [1 0 0]
             [0 1 0]
@@ -36,10 +38,10 @@ int main() {
             [0 3 0]
             [0 0 3]*/
 
-  Matrix b{arr, 3, 3};
-  a *= -3;
-  cout << (a+b) << endl;  // prints the 0 matrix
-  cout << (b-a) << endl;
+  // Matrix b{arr, 3, 3};
+  // a *= -3;
+  // cout << (a+b) << endl;  // prints the 0 matrix
+  // cout << (b-a) << endl;
   /* prints [6 0 0]
             [0 6 0]
             [0 0 6]*/

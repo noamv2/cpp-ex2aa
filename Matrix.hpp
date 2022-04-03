@@ -1,12 +1,14 @@
 #pragma once
 #include <vector>
 #include <iostream>
+#include <string>
 using std::vector;
 
 class Matrix{
 
-    // global overloaded operators
+    // globaly overloaded operators
     friend std::ostream & operator<<(std::ostream & os, const Matrix &m);
+    friend Matrix operator>>(std::istream & os, const Matrix &m);
     friend Matrix operator*(double scalar, const Matrix & m);
     friend Matrix operator*(const Matrix & m, double scalar );
     friend Matrix operator*(const Matrix & m, const Matrix & m2);
@@ -17,11 +19,12 @@ class Matrix{
         vector<vector<double>> mat;
         
     public:
-        const int rowsNum, colsNum;
+        size_t rowsNum, colsNum;
+        Matrix(vector<double> vals, size_t rows, size_t cols );
         Matrix(vector<double> vals, int rows, int cols );
         Matrix(const Matrix &m);
         ~Matrix(){
-            std::cout<<"Destructor called for: "<<rowsNum <<" X " <<colsNum<<std::endl;
+            // std::cout<<"Destructor called for: "<<rowsNum <<" X " <<colsNum<<std::endl;
         }
         
         
@@ -49,7 +52,8 @@ class Matrix{
 
         // methods
         bool isSameDim(const Matrix &) const;
-        double get(int,int) const;
+        double get(size_t,size_t) const;
         double sum() const;
 
 };
+

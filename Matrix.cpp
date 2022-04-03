@@ -1,29 +1,36 @@
 #include "Matrix.hpp"
-
+#include "helpers.hpp"
 
 // constructors
-Matrix::Matrix(vector<double> vals, int rows, int cols):
+
+//Used to handle dimention in ints, dellegating to the size_t constructor
+Matrix::Matrix(vector<double> vals, int rows, int cols )
+:Matrix(std::move(vals),static_cast<size_t>(checkPositive(rows)), static_cast<size_t>(checkPositive(cols))){
+    
+}
+
+Matrix::Matrix(vector<double> vals, size_t rows, size_t cols):
     rowsNum{rows}, colsNum{cols}{
 
     //check dimentions are legal
-    if( rows <= 0 || cols <= 0 || vals.size() != rows * cols ){
-        throw "Illegal dimentions";
+    if(vals.size() != rows * cols){
+        throw "Invalid dimensions";
     }
-
+    
     for(int i = 0 ; i < rows; i++){
         this->mat.push_back(vector<double> (cols));
     }
     for(size_t i = 0 ; i < rows * cols; i++){
         
-        this->mat.at(i / rows).at(i % cols) = vals.at(i);
+        this->mat.at(i / cols).at(i % cols) = vals.at(i);
     }
 
 
 }
-Matrix::Matrix(const Matrix &m)
+Matrix::Matrix(const Matrix &m) // copy constructor
     :rowsNum{m.rowsNum},colsNum{m.colsNum} {
     this->mat = m.mat;    
-    std::cout<<"copy constructor called"<<std::endl;
+    // std::cout<<"copy constructor called"<<std::endl;
 }
 
 //Overloaded operators (Class members)
@@ -111,8 +118,8 @@ Matrix Matrix::operator+(){
 
 void Matrix:: operator--(){
 
-    for(int i =0; i < rowsNum; i++){
-        for (int k = 0 ; k < colsNum; k++){
+    for(size_t i =0; i < rowsNum; i++){
+        for (size_t k = 0 ; k < colsNum; k++){
             mat.at(i).at(k)--;
         }
     }
@@ -120,20 +127,24 @@ void Matrix:: operator--(){
 
 void Matrix:: operator++(){
 
-    for(int i =0; i < rowsNum; i++){
-        for (int k = 0 ; k < colsNum; k++){
+    for(size_t i =0; i < rowsNum; i++){
+        for (size_t k = 0 ; k < colsNum; k++){
             mat.at(i).at(k)++;
         }
     }
 }
 
 bool Matrix:: operator==(const Matrix &m){
-
+    
+    if(!isSameDim(m)){
+        throw "Invalid operation";
+    }
     if(this == &m){
         return true;
     }
-    for(int i = 0 ; i <m.rowsNum; i++){
-        for (int j = 0; j < m.colsNum ; j++)
+
+    for(size_t i = 0 ; i <m.rowsNum; i++){
+        for (size_t j = 0; j < m.colsNum ; j++)
         {
             if(this->get(i,j) != m.get(i,j)){
                 return false;
@@ -146,12 +157,16 @@ bool Matrix:: operator==(const Matrix &m){
 }
 
 bool Matrix:: operator!=(const Matrix &m){
-
+    
+    if(!isSameDim(m)){
+        throw "Invalid operation";
+    }
     if(this == &m){
         return false;
     }
-    for(int i = 0 ; i <m.rowsNum; i++){
-        for (int j = 0; j < m.colsNum ; j++)
+
+    for(size_t i = 0 ; i <m.rowsNum; i++){
+        for (size_t j = 0; j < m.colsNum ; j++)
         {
             if(this->get(i,j) != m.get(i,j)){
                 return true;
@@ -164,23 +179,38 @@ bool Matrix:: operator!=(const Matrix &m){
 }
 
 bool Matrix:: operator<=(const Matrix &m){
-
+    
+    if(!isSameDim(m)){
+        throw "Invalid operation";
+    }
     if(this == &m){
         return true;
     }
-    return sum() <= m.sum();
+    if(this->operator==(m)){
+        return true;
+    }
+    return sum() < m.sum();
 }
 
 bool Matrix:: operator>=(const Matrix &m){
-
+    
+    if(!isSameDim(m)){
+        throw "Invalid operation";
+    }
     if(this == &m){
         return true;
     }
-    return sum() >= m.sum();
+
+    if(this->operator==(m)){
+        return true;
+    }
+    return sum() > m.sum();
 }
 
 bool Matrix:: operator<(const Matrix &m){
-
+    if(!isSameDim(m)){
+        throw "Invalid operation";
+    }
     if(this == &m){
         return true;
     }
@@ -189,6 +219,9 @@ bool Matrix:: operator<(const Matrix &m){
 
 bool Matrix:: operator>(const Matrix &m){
 
+    if(!isSameDim(m)){
+        throw "Invalid operation";
+    }
     if(this == &m){
         return true;
     }
@@ -204,8 +237,8 @@ void Matrix::operator*=(double scalar){
     }
     
 }
-// Globaly overloaded operators
 
+// Globaly overloaded operators
 
 std::ostream & operator<<(std::ostream &os, const Matrix &m){
     
@@ -219,6 +252,7 @@ std::ostream & operator<<(std::ostream &os, const Matrix &m){
     }
     return os;
 }
+
 
 Matrix operator*(double scalar, const Matrix &m){
 
@@ -250,11 +284,17 @@ Matrix operator*(const Matrix &m, const Matrix &m2){
     if( m.colsNum != m2.rowsNum){
         throw "Invalid operation for given dimentions";
     }
-    std::vector<double> res(m.rowsNum * m.colsNum);
+    std::vector<double> res;
 
-    for(size_t i = 0 ;i < m.rowsNum * m.colsNum; i ++){
-        res.at(i) = (m2.mat.at(i / m2.rowsNum).at(i % m2.colsNum)) * (m.mat.at(i / m.rowsNum).at(i % m.colsNum));
+    for(size_t i = 0 ; i < m.rowsNum; i++){
+        for(size_t j = 0; j < m2.colsNum; j++){
+            res.push_back(0);
+            for(size_t k = 0; k < m.colsNum; k++){
+                res.back() += m.get(i,k) * m2.get(k, j);
+            }
+        }
     }
+
     
     return Matrix {res, m.rowsNum, m.colsNum};
 
@@ -266,7 +306,7 @@ bool Matrix::isSameDim(const Matrix &b) const{
     return rowsNum == b.rowsNum && b.colsNum == colsNum;
 }
 
-double Matrix::get(int r, int c) const{
+double Matrix::get(size_t r, size_t c) const{
     return this->mat.at(r).at(c);
 }
 
@@ -280,3 +320,13 @@ double Matrix:: sum() const{
     }
     return s;
 }
+
+int checkPositive(int n){
+
+    if(n <= 0){
+        throw "Invalid dimensions";
+    }
+
+    return n;
+}
+
