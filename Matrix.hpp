@@ -4,6 +4,7 @@
 #include <string>
 using std::vector;
 
+namespace zich{};
 class Matrix{
 
     // globaly overloaded operators
